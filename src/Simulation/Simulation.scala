@@ -11,6 +11,7 @@ class Simulation(var totalPopulation: Int,  indoorInfectionRate: Double,
                  seedPopulationPercentage: Double, initialViralLoad: Double,
                  transitionProbabilities: Map[(Int, Int), Double], viralLoadThreshold: Map[Int, Double]) {
 
+  val allMembers: mutable.ArrayBuffer[Agent] = new mutable.ArrayBuffer[Agent]()
   val allGroups: mutable.ArrayBuffer[Group] = new mutable.ArrayBuffer[Group]()
   val allPublicPlaces: mutable.ArrayBuffer[PublicPlace] = new mutable.ArrayBuffer[PublicPlace]()
   val largePublicPlaceCapacity: Int = 100
@@ -33,7 +34,14 @@ class Simulation(var totalPopulation: Int,  indoorInfectionRate: Double,
       allGroups.append(group)
       zerothVisitCompleted.addOne(group)
       /* Initializing agents in each group */
-      group.initialize()
+      for (_ <- 0 until randomSize) {
+        val newMember: Agent = new Agent()
+        newMember.sigmoidPoint = Random.between(10, 14)
+        newMember.rateOfInflexion = Random.between(0.5, 3.5)
+        newMember.group = group
+        group.familyMembers.append(newMember)
+        allMembers.append(newMember)
+      }
       populationTracker += randomSize
     }
     totalPopulation = populationTracker
@@ -46,7 +54,6 @@ class Simulation(var totalPopulation: Int,  indoorInfectionRate: Double,
       val groupMembers: mutable.ArrayBuffer[Agent] = groupToSeed.familyMembers
       val infectMember: Agent = groupMembers(Random.between(0,groupMembers.size)) /** Choose a random agent. */
       infectMember.viralLoad += initialViralLoad
-      groupToSeed.updateCategory(transitionProbabilities, viralLoadThreshold)
     }
   }
 
@@ -90,19 +97,53 @@ class Simulation(var totalPopulation: Int,  indoorInfectionRate: Double,
           group.visitPublicPlace(publicPlace)
           currentPool.subtractOne(group)
         }
+
+        val initBuffer1 = mutable.ArrayBuffer[Agent]()
+        val initBuffer2 = mutable.ArrayBuffer[Agent]()
+        val initBuffer3 = mutable.ArrayBuffer[Agent]()
+        val initBuffer4 = mutable.ArrayBuffer[Agent]()
+        val currentSituation: mutable.Map[Int, mutable.ArrayBuffer[Agent]] = mutable.Map(1 -> initBuffer1, 2 -> initBuffer2, 3 -> initBuffer3, 4 -> initBuffer4)
+
         for (group <- allGroups) {
-          // Updating indoor infection rate //
-          val groupMembers = group.familyMembers
-          val infectedMembersSize = group.infectedMemberSize
-          val increaseViralLoadBy: Double = indoorInfectionRate * (infectedMembersSize / groupMembers.size)
-          for (member <- groupMembers) {
-            member.viralLoad += increaseViralLoadBy
+            // Updating indoor infection rate //
+            val groupMembers = group.familyMembers
+            val infectedMembersSize = group.infectedMemberSize
+            val increaseViralLoadBy: Double = indoorInfectionRate * (infectedMembersSize / group.size)
+            for (agent <- groupMembers) {
+              agent.viralLoad += increaseViralLoadBy
+              val category = agent.category
+              val limit = viralLoadThreshold(category+1)
+              if (agent.viralLoad >= limit) {
+                currentSituation(category+1).append(agent)
+              }
+              agent.updateInfectionRecovery(viralLoadThreshold)
+            }
+        }
+
+        for ((categoryNum, buffer) <- currentSituation) {
+          if (categoryNum == 1) {
+            for (agent <- buffer) {
+              agent.category += 1
+              agent.group.infectedMemberSize += 1
+            }
           }
-          // Update categories and viral load of members, also update the time map. //
-          group.updateCategory(transitionProbabilities, viralLoadThreshold)
-          for (member <- groupMembers) {
-            categoryNumbers(member.category) += 1
+          else {
+            val tP = transitionProbabilities((categoryNum - 1, categoryNum))
+            val bufferSize = buffer.size
+            val transitioningNumber = (bufferSize * tP).toInt
+            for (_ <- 0 until transitioningNumber) {
+              val agent = buffer(Random.nextInt(bufferSize))
+              agent.category += 1
+              if (agent.category == 4) {
+                agent.group.familyMembers.subtractOne(agent) // Agent deceased!
+                allMembers.subtractOne(agent)
+              }
+            }
           }
+        }
+        // update the time map. //
+        for (member <- allMembers) {
+          categoryNumbers(member.category) += 1
         }
         returnData += (t -> categoryNumbers)
         for (publicPlace <- allPublicPlaces) publicPlace.aggregateViralLoad = 0 //Setting public place's viral load to zero.
