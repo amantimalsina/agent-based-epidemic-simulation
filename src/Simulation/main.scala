@@ -1,7 +1,6 @@
 package Simulation
 
 
-
 object main {
   def main(args: Array[String]): Unit = {
     val startTime = System.nanoTime()
@@ -13,7 +12,7 @@ object main {
     val totalTimeStep: Int = 50
     val seedPopulationPercentage: Double = 0.05
     val initialViralLoad: Double = 0.2
-    val indoorInfectionRate: Double = 0.5
+    val indoorInfectionRate: Double = 0.3
     /* Transition Probabilities: */
     val transitionProbabilities: Map[(Int, Int), Double] = Map((1,2)-> 0.2, (2,3) -> 0.3, (3,4) -> 0.5) // (2,3) signifies P(2,34)
     /* Viral Load Thresholds: */
@@ -30,6 +29,8 @@ object main {
     val endTime = System.nanoTime()
     val computingTime = endTime - startTime
     println(f"Computing Time: ${computingTime/ Math.pow(10,9)} seconds")
-    println(retMap)
+
+
+
   }
 }
