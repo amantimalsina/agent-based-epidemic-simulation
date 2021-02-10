@@ -1,12 +1,11 @@
 package Simulation.Objects
 
-class Agent {
+class Agent(var group: Group) {
   var viralLoad: Double = 0.0
   var infectedSince: Int = 0
   var category: Int = 0
   var sigmoidPoint: Int = 0
   var rateOfInflexion: Double = 0
-  var group: Group = null
 
 
   def infected(): Boolean = {

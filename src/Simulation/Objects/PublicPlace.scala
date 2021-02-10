@@ -1,7 +1,7 @@
 package Simulation.Objects
 
-class PublicPlace(val capacity: Int) {
-  var occupancy: Int = 0
+
+class PublicPlace(var size: String) {
   var aggregateViralLoad: Double = 0
 
   def incrementViralLoad(agent: Agent): Unit = {
