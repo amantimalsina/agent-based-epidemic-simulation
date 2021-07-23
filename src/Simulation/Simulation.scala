@@ -55,7 +55,7 @@ class Simulation(var totalPopulation: Int,  indoorInfectionRate: Double,
   def initializeSeedPopulation(): Unit = {
     val seedPopulation: Int = (totalPopulation * seedPopulationPercentage).toInt
     for (_ <- 0 to seedPopulation) {
-      while (infectMember()){
+      while (!infectMember()){
         //
       }
     }

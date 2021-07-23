@@ -18,12 +18,12 @@ object main {
     val seedPopulationPercentage: Double = 0.05
     val vaccinatedPopulationPercentage: Double = 0.03
     val perDayVaccinationRate: Double = 0.02
-    val initialViralLoad: Double = 0.21
+    val initialViralLoad: Double = 0.25
     val indoorInfectionRate: Double = 0.2
     /* Transition Probabilities: */
-    val transitionProbabilities: Map[(Int, Int), Double] = Map((1,2)-> 0.5, (2,3) -> 0.3, (3,4) -> 0.5) // (2,3) signifies P(2,34)
+    val transitionProbabilities: Map[(Int, Int), Double] = Map((1,2)-> 0.2, (2,3) -> 0.1, (3,4) -> 0.05) // (2,3) signifies P(2,34)
     /* Viral Load Thresholds: */
-    val viralLoadThreshold: Map[Int, Double] = Map(1-> 0.2, 2 -> 0.25, 3 -> 0.30, 4 -> 0.35)
+    val viralLoadThreshold: Map[Int, Double] = Map(1-> 0.25, 2 -> 0.35, 3 -> 0.50, 4 -> 0.65)
     val simulation1 = new Simulation(totalPopulation, indoorInfectionRate,
       totalTimeStep, numberOfPublicPlaces, publicPlaceOccupancyRate, epsilonCategory,
       seedPopulationPercentage, perDayVaccinationRate, initialViralLoad, transitionProbabilities, viralLoadThreshold)
