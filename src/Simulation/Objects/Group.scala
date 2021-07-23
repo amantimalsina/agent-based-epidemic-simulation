@@ -13,7 +13,7 @@ class Group(var size: Int) {
   def visitPublicPlace(publicPlace: PublicPlace, publicPlaceOccupancyRate: Double, epsilonCategory: Map[String, Double], publicPlaceConstant: Double): Unit = {
     val agentToVisit: Agent = nonHospitalizedMembers(Random.nextInt(nonHospitalizedMembers.size)) /** Choose a random member. */
     val increaseViralLoadBy = publicPlace.averageViralLoad * (publicPlaceOccupancyRate + epsilonCategory(publicPlace.size))
-    agentToVisit.viralLoad += agentToVisit.immunityConstant * increaseViralLoadBy
+    agentToVisit.viralLoad += increaseViralLoadBy
     publicPlace.incrementViralLoad(agentToVisit)
   }
 
